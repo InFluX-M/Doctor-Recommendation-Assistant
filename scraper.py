@@ -1,8 +1,10 @@
 import requests as req
-from bs4 import BeautifulSoup
-from bs4.element import Tag
 import re
-# import pandas as pd
+import json
+import pandas as pd
+import time
+from random import random
+import logging
 
 
 class Paziresh24:
@@ -14,22 +16,90 @@ class Paziresh24:
             "sec-ch-ua-platform": "Windows",
             "Upgrade-Insecure-Requests": "1",
         }
+        response = req.get("https://apigw.paziresh24.com/v1/search/tehran", headers=self.headers)
+        self.expertises = [c[8:-1] for c in re.findall(r"/tehran/[a-zA-Z-]*/", json.dumps(response.json()))]
+        self.cities = ['tehran', 'mashhad', 'shiraz', 'isfahan', 'tabriz', 'ahvaz', 'ilam', 'arak', 'ardabil', 'bandar-abbas', 'birjand', 'bushehr', 'karaj', 'orumieh', 'shahrekord', 'bojnurd', 'zanjan', 'semnan', 'zahedan', 'qazvin', 'qom', 'sanandaj', 'kerman', 'kermanshah', 'yasuj', 'gorgan', 'rasht', 'khorramabad', 'sari', 'hamedan', 'yazd']
+        self.genders = ['&gender=male', '&gender=female']
 
-    # //a[@class="plasmic_all__wY2Hq plasmic_a__BSjOJ PlasmicProductCard_link__iYnI7__L4ml6"]
+        self.data = pd.DataFrame()
 
-    def get_page(self, page: int):
-        response = req.get(f"https://www.paziresh24.com/s/?page={page}", headers=self.headers)
-        soup = BeautifulSoup(response.content, "html.parser")
-        doctors: list[Tag] = soup.find_all("div", {"class": "plasmic_all__wY2Hq plasmic_root_reset__Hz2Yu plasmic_plasmic_default_styles__sA4Gj plasmic_plasmic_mixins__M49At plasmic_plasmic_tokens__DKeCq plasmic_plasmic_tokens__kU4gq PlasmicProductCard_root__dfpAk __wab_instance PlasmicSearchResults_productCard__NkCp3"})
-        for doctor in doctors:
-            name = doctor.find("h2").text
-            rate = float(doctor.find("span", {"class": "plasmic_all__wY2Hq plasmic_span__3nUDA PlasmicProductCard_span__zMlGi__XAw7_"}).text)
-            number_of_rates = int(re.findall(r'\d+', doctor.find("span", {"class": "plasmic_all__wY2Hq plasmic_span__3nUDA PlasmicProductCard_span__qbAn4__qqO0T"}).text)[0])
-            tags = [tag.text for tag in doctor.find_all("div", {"class": "plasmic_all__SAkWn PlasmicChip_text__h2gZ7 PlasmicChip_textcolor_green__3Z_Cy"})]
-            address = doctor.find("span", {"class": "plasmic_all__wY2Hq plasmic_span__3nUDA PlasmicProductCard_cardAddressRow__YUuOn"}).text
+        logging.basicConfig(
+            filename='data_collection.log',
+            level=logging.INFO,
+            format='%(asctime)s - %(message)s',
+            filemode='a'
+        )
+
+    def get_last_collected_strata(self) -> set:
+        collected_strata = set()
+        try:
+            with open('data_collection.log', 'r') as log_file:
+                lines = log_file.readlines()
+                for line in lines:
+                    if "collected" in line:
+                        collected_strata.add(line.strip().split('collected ')[1])
+        except FileNotFoundError:
+            pass
+        return collected_strata
 
 
+    def get_strata(self, endpoint: str = "", sleep_multiplier: int = 4) -> pd.DataFrame:
+        df = pd.DataFrame()
+        for page_num in range(1, 26):
+            time.sleep(sleep_multiplier * random() + 0.125)
+            while True:
+                try:
+                    response = req.get(f"https://apigw.paziresh24.com/v1/search/{endpoint}&page={page_num}", headers=self.headers)
+                    if response.status_code == 200:
+                        break
+                except:
+                    time.sleep(2 * random() + 0.125)
+                    pass
+
+            if response.status_code != 500:
+                result = response.json()['search']['result']
+            else:
+                print("--- Status Code == 500 ---")
+                result = None
+
+            if result:
+                new_df = pd.DataFrame(result)
+                new_df = new_df[['id', 'display_name', 'name', 'gender', 'calculated_rate', 'rates_count', 'insurances', 'number_of_visits', 'expertise', 'display_expertise', 'display_address', 'waiting_time', 'badges', 'centers', 'actions', 'url', 'image']]
+                df = pd.concat([df, new_df], axis=0, ignore_index=True)
+                print(f"-+- got {endpoint} page {page_num}")
+            else:
+                print(f"--- {endpoint} page {page_num} is empty... moving on")
+                break
+        return df
+
+    def get_data(self, sleep_multiplier: int = 4) -> pd.DataFrame:
+        collected_strata = self.get_last_collected_strata()
+
+        for city in self.cities:
+            for expertise in self.expertises:
+                strata = f"{city}/{expertise}"
+                if strata in collected_strata:
+                    print(f"-*- {strata} already collected")
+                    continue
+
+                df = self.get_strata(strata + f"/?result_type=فقط+پزشکان")
+                self.data = pd.concat([self.data, df], axis=0, ignore_index=True)
+                
+                if df.shape[0] == 500:
+                    for gender in self.genders:
+                        time.sleep(sleep_multiplier * random() + 0.125)
+                        df = self.get_strata(strata + f"/?result_type=فقط+پزشکان{gender}")
+                        self.data = pd.concat([self.data, df], axis=0, ignore_index=True)
+
+                self.data.drop_duplicates(subset='id', inplace=True)
+                self.data.to_csv('sample_running.csv')
+                logging.info(f"collected {strata}")
+        
+        return self.data
 
 if __name__ == "__main__":
-    crawler = Paziresh24()
-    crawler.get_page(1)
+    p = Paziresh24()
+    tstamp0 = time.time()
+    df = p.get_data()
+    tstamp1 = time.time()
+    print('total seconds:', tstamp1 - tstamp0)
