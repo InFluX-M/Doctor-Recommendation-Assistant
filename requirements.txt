@@ -1,2 +1,4 @@
 requests
 pandas
+SpeechRecognition==3.10.4
+pydub==0.25.1
