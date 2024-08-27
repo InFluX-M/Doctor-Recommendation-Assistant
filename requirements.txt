@@ -1,4 +1,10 @@
 requests
+numpy
 pandas
+sklearn
+torch
 SpeechRecognition==3.10.4
 pydub==0.25.1
+transformers
+seqeval[gpu]
+mlflow
