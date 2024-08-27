@@ -43,17 +43,19 @@ class Paziresh24:
         return collected_strata
 
 
-    def get_strata(self, endpoint: str = "", sleep_multiplier: int = 4) -> pd.DataFrame:
+    def get_strata(self, endpoint: str = "", sleep_multiplier: int = 1.5) -> pd.DataFrame:
         df = pd.DataFrame()
+        status500 = 0
         for page_num in range(1, 26):
             time.sleep(sleep_multiplier * random() + 0.125)
             while True:
                 try:
                     response = req.get(f"https://apigw.paziresh24.com/v1/search/{endpoint}&page={page_num}", headers=self.headers)
-                    if response.status_code == 200:
+                    if response.status_code in [200, 500]:
                         break
-                except:
-                    time.sleep(2 * random() + 0.125)
+                except Exception as e:
+                    print(e)
+                    time.sleep(sleep_multiplier * random() + 0.125)
                     pass
 
             if response.status_code != 500:
@@ -63,12 +65,20 @@ class Paziresh24:
                 result = None
 
             if result:
-                new_df = pd.DataFrame(result)
-                new_df = new_df[['id', 'display_name', 'name', 'gender', 'calculated_rate', 'rates_count', 'insurances', 'number_of_visits', 'expertise', 'display_expertise', 'display_address', 'waiting_time', 'badges', 'centers', 'actions', 'url', 'image']]
+                df_result = pd.DataFrame(result)
+                new_df = pd.DataFrame()
+                for col in ['id', 'display_name', 'name', 'gender', 'calculated_rate', 'rates_count', 'insurances', 'number_of_visits', 'expertise', 'display_expertise', 'display_address', 'waiting_time', 'badges', 'centers', 'actions', 'url', 'image']:
+                    try:
+                        new_df[col] = df_result[col]
+                    except:
+                        new_df[col] = None
                 df = pd.concat([df, new_df], axis=0, ignore_index=True)
-                print(f"-+- got {endpoint} page {page_num}")
+                print(f"-+- {time.strftime("%H:%M:%S")} got {endpoint} page {page_num}")
+            elif status500 == 0:
+                status500 += 1
+                print(f"--- {time.strftime("%H:%M:%S")} {endpoint} page {page_num} is empty... moving on")
             else:
-                print(f"--- {endpoint} page {page_num} is empty... moving on")
+                print(f"--- {time.strftime("%H:%M:%S")} {endpoint} page {page_num} is empty... moving on")
                 break
         return df
 
