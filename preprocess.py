@@ -34,7 +34,7 @@ class Doctor:
         self.df.drop('gender', axis=1, inplace=True)
         self.df['name'].loc[self.df['name'].isna()] = self.df['display_name'].loc[self.df['name'].isna()].str.split().str[0] # fill missing names with display_name's first word
         self.df = pd.merge(self.df, names, how='left', on='name')
-        df = df[
+        self.df = self.df[
             ['id', 'display_name', 'name', 'gender', 'calculated_rate', 'rates_count', 'insurances', 'number_of_visits', 'expertise', 'display_expertise', 'display_address', 'waiting_time', 'badges', 'centers', 'actions', 'url', 'image']
         ] # reorder columns
         for fname in [' سیده', 'سیده‌', 'سادات']:
