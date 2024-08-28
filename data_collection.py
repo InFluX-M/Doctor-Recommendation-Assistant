@@ -114,7 +114,7 @@ class Paziresh24:
                         self.data = pd.concat([self.data, df], axis=0, ignore_index=True)
 
                 self.data.drop_duplicates(subset='id', inplace=True)
-                self.data.to_csv('doctors.csv')
+                self.data.to_csv('data/doctors.csv')
                 logging.info(f"collected {strata}")
         
         return self.data
