@@ -1,6 +1,7 @@
 import pandas as pd
 import sqlite3
 import os
+import ast
 
 class Doctor:
     def __init__(self, dataframe:pd.DataFrame) -> None:
@@ -42,8 +43,16 @@ class Doctor:
         self.df['gender'].loc[(self.df['name'].str.contains("سید")) & (self.df['gender'].isna())] = 1
         self.df['gender'].loc[(self.df['gender'].isna())] = api_gender.loc[(self.df['gender'].isna())]
         return self.df
-        
-
+    
+    def get_badges(self) -> pd.DataFrame:
+        self.df['badges'] = self.df['badges'].apply(lambda x: [badge['title'] for badge in ast.literal_eval(x)])
+        self.df['منتخب پذیرش24'] = self.df['badges'].apply(lambda x: 1 if 'منتخب پذیرش24' in x else 0)
+        self.df['خوش برخورد'] = self.df['badges'].apply(lambda x: 1 if 'خوش برخورد' in x else 0)
+        self.df['کمترین معطلی'] = self.df['badges'].apply(lambda x: 1 if 'کمترین معطلی' in x else 0)
+        self.df.drop('badges', axis=1, inplace=True)
+        return self.df
+    
 if __name__ == "__main__":
     doctor = Doctor(pd.read_csv("data/doctors.csv"))
-    doctor.correct_gender("data/names.sql")
+    df = doctor.correct_gender("data/names.sql")
+    df = doctor.get_badges()
