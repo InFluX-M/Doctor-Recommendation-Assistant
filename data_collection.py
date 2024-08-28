@@ -16,8 +16,20 @@ class Paziresh24:
             "sec-ch-ua-platform": "Windows",
             "Upgrade-Insecure-Requests": "1",
         }
-        response = req.get("https://apigw.paziresh24.com/v1/search/tehran", headers=self.headers)
-        self.expertises = [c[8:-1] for c in re.findall(r"/tehran/[a-zA-Z-]*/", json.dumps(response.json()))]
+        try:
+            response = req.get("https://apigw.paziresh24.com/v1/search/tehran", headers=self.headers)
+            self.expertises = [c[8:-1] for c in re.findall(r"/tehran/[a-zA-Z-]*/", json.dumps(response.json()))]
+        except:
+            print("--- Expertises Status Code == 500 ---\n--- Reading from log file ---")
+            self.expertises = []
+            try:
+                with open('data_collection.log', 'r') as log_file:
+                    lines = log_file.readlines()
+                    for line in lines:
+                        if "collected" in line:
+                            self.expertises.append(line.strip().split('collected ')[1])
+            except FileNotFoundError:
+                pass
         self.cities = ['tehran', 'mashhad', 'shiraz', 'isfahan', 'tabriz', 'ahvaz', 'ilam', 'arak', 'ardabil', 'bandar-abbas', 'birjand', 'bushehr', 'karaj', 'orumieh', 'shahrekord', 'bojnurd', 'zanjan', 'semnan', 'zahedan', 'qazvin', 'qom', 'sanandaj', 'kerman', 'kermanshah', 'yasuj', 'gorgan', 'rasht', 'khorramabad', 'sari', 'hamedan', 'yazd']
         self.genders = ['&gender=male', '&gender=female']
 
