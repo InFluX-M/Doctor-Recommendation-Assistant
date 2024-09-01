@@ -43,6 +43,14 @@ class Doctor:
             self.dataframe['gender'].loc[(self.dataframe['name'].str.contains(fname)) & (self.dataframe['gender'].isna())] = 2
         self.dataframe['gender'].loc[(self.dataframe['name'].str.contains("سید")) & (self.dataframe['gender'].isna())] = 1
         self.dataframe['gender'].loc[(self.dataframe['gender'].isna())] = api_gender.loc[(self.dataframe['gender'].isna())]
+        def gender_to_text(x):
+            if x == 1:
+                return 'مرد'
+            elif x == 2:
+                return 'زن'
+            else:
+                return None
+        self.dataframe['gender'] = self.dataframe['gender'].apply(gender_to_text)
         return
     
     def convert_str_to_list(self) -> None:
