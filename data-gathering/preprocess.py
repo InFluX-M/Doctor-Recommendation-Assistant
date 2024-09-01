@@ -3,6 +3,8 @@ import sqlite3
 import os
 import ast
 import re
+import jdatetime
+from datetime import datetime
 
 class Doctor:
     def __init__(self, dataframe:pd.DataFrame) -> None:
@@ -41,6 +43,8 @@ class Doctor:
         ] # reorder columns
         for fname in [' سیده', 'سیده‌', 'سادات']:
             self.dataframe['gender'].loc[(self.dataframe['name'].str.contains(fname)) & (self.dataframe['gender'].isna())] = 2
+        self.dataframe['gender'].loc[(self.dataframe['name'].str == "سیده") & (self.dataframe['gender'].isna())] = 2
+
         self.dataframe['gender'].loc[(self.dataframe['name'].str.contains("سید")) & (self.dataframe['gender'].isna())] = 1
         self.dataframe['gender'].loc[(self.dataframe['gender'].isna())] = api_gender.loc[(self.dataframe['gender'].isna())]
         def gender_to_text(x):
@@ -107,12 +111,50 @@ class Doctor:
         self.dataframe['centers'] = self.dataframe['centers'].apply(prune)
         return
     
+    @classmethod
+    def convert_text_to_gregorian(cls, text: str) -> datetime:
+        if text == None:
+            return None
+        months = {
+            'فروردین': 1,
+            'اردیبهشت': 2,
+            'خرداد': 3,
+            'تیر': 4,
+            'مرداد': 5,
+            'شهریور': 6,
+            'مهر': 7,
+            'آبان': 8,
+            'آذر': 9,
+            'دی': 10,
+            'بهمن': 11,
+            'اسفند': 12
+        }
+        text = text.split(' ')
+        if text[0] in ['امروز', 'کمتر']:
+            date = jdatetime.date.today()
+        elif text[0] == 'فردا':
+            date = jdatetime.date.today() + jdatetime.timedelta(days=1)
+        else:
+            day = text[0]
+            month = months.get(text[1])
+            year = jdatetime.date.today().year
+            if jdatetime.date.today().month > month:
+                year += 1
+            date = jdatetime.date(year, month, int(day))
+        gregorian_datetime = date.togregorian()
+        return gregorian_datetime
+    
+    def convert_first_available_appointment(self) -> None:
+        self.dataframe['first_available_appointment'] = self.dataframe['first_available_appointment'].apply(self.convert_text_to_gregorian)
+        return
+    
     def process(self, sql_script_path: str) -> pd.DataFrame:
         self.correct_gender(sql_script_path)
         self.convert_str_to_list()
         self.process_badges()
         self.process_actions()
         self.process_centers()
+        self.convert_first_available_appointment()
         return self.dataframe
     
 if __name__ == "__main__":
