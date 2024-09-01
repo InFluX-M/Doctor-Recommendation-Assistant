@@ -23,7 +23,7 @@ class Paziresh24:
             print("--- Expertises Status Code == 500 ---\n--- Reading from log file ---")
             self.expertises = []
             try:
-                with open('data_collection.log', 'r') as log_file:
+                with open('temp/data_collection.log', 'r') as log_file:
                     lines = log_file.readlines()
                     for line in lines:
                         if "collected" in line:
@@ -36,7 +36,7 @@ class Paziresh24:
         self.data = pd.DataFrame()
 
         logging.basicConfig(
-            filename='data_collection.log',
+            filename='temp/data_collection.log',
             level=logging.INFO,
             format='%(asctime)s - %(message)s',
             filemode='a'
@@ -45,7 +45,7 @@ class Paziresh24:
     def get_last_collected_strata(self) -> set:
         collected_strata = set()
         try:
-            with open('data_collection.log', 'r') as log_file:
+            with open('temp/data_collection.log', 'r') as log_file:
                 lines = log_file.readlines()
                 for line in lines:
                     if "collected" in line:
