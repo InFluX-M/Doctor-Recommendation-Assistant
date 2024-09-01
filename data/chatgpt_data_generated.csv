@@ -1,0 +1,20 @@
+,sentence,label
+0,سلام دنبال یه دکتر فوق تخصص ریه داخل بندر انزلی هستم که تجربه بالایی داشته باشه و فردا صبح نوبت بده .,O O O O B-srt I-srt B-spy O B-cty I-cty O O B-trt I-trt O O O B-apt I-apt O O O
+1,یه متخصص کلیه در ارومیه میخوام که تو درمان نارسایی کلیه مهارت داشته باشه و هفته بعد نوبت بده .,O B-srt B-spy O B-cty O O O O B-cnd I-cnd B-trt O O O B-apt I-apt O O O
+2,لطفاً یه دکتر متخصص غدد توی بروجرد برام پیدا کنید که تو کارش خبره باشه و سریع نوبت بده .,O O O B-srt B-spy O B-cty O O O O O O B-trt O O B-apt O O O
+3,یه دکتر مغز و اعصاب توی ساری میخوام که در درمان صرع تخصص داشته باشه و سه روز دیگه نوبت بده .,O O B-spy O B-spy O B-cty O O O O B-cnd O O O O B-apt I-apt O O O O
+4,توی زنجان دنبال یک متخصص ارتوپدی می گردم که تجربه زیادی داشته باشه و نوبت برای آخر هفته بده .,O B-cty O O B-srt B-spy O O O B-trt I-trt O O O O O B-apt I-apt O O
+5,یه متخصص روماتولوژی در کاشان نیاز دارم که کارش عالی باشه و برای دو هفته بعد نوبت بده .,O B-srt B-spy O B-cty O O O O B-trt O O O B-apt I-apt O O O O
+6,سلام ، توی قزوین یه متخصص تغذیه لازم دارم که برای کاهش وزن مشاوره بده و ماه آینده وقت داشته باشه .,O O O B-cty O B-srt B-spy O O O O B-cnd I-cnd O O O B-apt I-apt O O O O
+7,یه متخصص غدد در اردبیل میخوام که توی خیابان امام مطب داشته باشه و سریع نوبت بده .,O B-srt B-spy O B-cty O O O B-nhd I-nhd O O O O B-apt O O O
+8,لطفاً یه متخصص اطفال تو خرم آباد برام پیدا کنید که تجربه کافی در درمان کودکان بیمار داشته باشه و فردا نوبت بده .,O O B-srt B-spy O B-cty I-cty O O O O B-trt I-trt O O B-cnd I-cnd O O O B-apt O O O
+9,تو بجنورد دنبال یه متخصص زنان هستم که برای بارداری مشاوره بده و نوبت برای هفته آینده داشته باشه .,O B-cty O O B-srt B-spy O O O B-cnd O O O O O B-apt I-apt O O O
+10,یه دکتر چشم پزشک تو یزد می خوام که تجربه زیادی در جراحی چشم داشته باشه و برای آخر هفته نوبت بده .,O O B-spy O O B-cty O O O B-trt I-trt O B-cnd I-cnd O O O O B-apt I-apt O O O
+11,داخل زاهدان دنبال یک متخصص گوش و حلق و بینی می گردم که دو هفته بعد نوبت بده .,O B-cty O O B-srt B-spy O B-spy O B-spy O O O B-apt I-apt O O O O
+12,نیاز به یه فوق متخصص پوست و مو توی کرمان دارم که توی خیابان مطهری مطب داشته باشه و فردا عصر نوبت بده .,O O O B-srt I-srt B-spy O B-spy O B-cty O O O B-nhd I-nhd O O O O B-apt I-apt O O O
+13,سلام ، یه دکتر فلوشیپ زنان در اردکان میخوام که تو درمان نازایی مهارت داشته باشه و ماه بعد وقت بده .,O O O O B-srt O O B-cty O O O O B-cnd O O O O B-apt I-apt O O O
+14,توی سنندج دنبال یه فلوشیپ ریه میگردم که مهارت کافی در درمان عفونتهای شدید داشته باشه و هفته آینده نوبت بده .,O B-cty O O B-srt B-spy O O B-trt I-trt O O B-cnd I-cnd O O O B-apt I-apt O O O
+15,سلام ، یه متخصص اعصاب و روان تو شهرکرد می خوام که خیلی حرفه ای باشه و ماه بعد نوبت بده .,O O O B-srt B-spy O B-spy O B-cty O O O O B-trt I-trt O O B-apt I-apt O O O
+16,یه دکتر فوق تخصص قلب و عروق تو بوشهر لازم دارم که نوبت برای دو روز دیگه بده .,O O B-srt I-srt B-spy O B-spy O B-cty O O O O O B-apt I-apt O O O
+,یه دکتر فوق تخصص قلب و عروق تو بندر عباس لازم دارم که نوبت برای دو روز دیگه بده .,O O B-srt I-srt B-spy O B-spy O B-cty I-cty O O O O O B-apt I-apt O O O
+,توی بندر عباس دنبال یه فلوشیپ ریه میگردم که مهارت کافی در درمان عفونت های شدید داشته باشه و هفته آینده نوبت بده .,O B-cty I-cty O O B-srt B-spy O O B-trt I-trt O O B-cnd I-cnd I-cnd O O O B-apt I-apt O O O
