@@ -65,7 +65,6 @@ class SpeechToText:
 
         for audio_file in audio_files:
             os.remove(audio_file)
-        os.rmdir("temp")  
         return text
 
 

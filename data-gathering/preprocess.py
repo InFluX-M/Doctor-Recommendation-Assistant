@@ -11,12 +11,15 @@ class Doctor:
         self.dataframe = dataframe
 
     def correct_gender(self, sql_script_path: str) -> None:
+        if not os.path.exists("temp"):
+            os.makedirs("temp")
+
         # get names dataset from sql script
         try:
-            os.remove('data/persian_names.db')
+            os.remove('temp/persian_names.db')
         except FileNotFoundError:
             pass
-        conn = sqlite3.connect('data/persian_names.db')
+        conn = sqlite3.connect('temp/persian_names.db')
         cursor = conn.cursor()
         with open(sql_script_path, 'r', encoding='utf-8') as file:
             conn.executescript(file.read())
@@ -25,7 +28,7 @@ class Doctor:
         rows = cursor.fetchall()
         conn.close()
         names = pd.DataFrame(rows, columns = ['name', 'gender'])
-        os.remove('data/persian_names.db')
+        os.remove('temp/persian_names.db')
 
         # cleaning names dataset
         names['gender'] = names['gender'].apply(lambda x: 1 if x == 'پسر' else 2)
