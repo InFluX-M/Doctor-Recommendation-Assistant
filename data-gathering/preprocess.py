@@ -66,7 +66,9 @@ class Doctor:
         return
         
     def process_badges(self) -> None:
-        self.dataframe['badges'] = self.dataframe['badges'].apply(lambda x: [badge['title'] for badge in x])
+        self.dataframe['badges'] = self.dataframe['badges'].apply(
+            lambda x: [badge['title'] for badge in x if "فعال" not in badge['title']]
+        )
         return
     
     def process_actions(self) -> None:
