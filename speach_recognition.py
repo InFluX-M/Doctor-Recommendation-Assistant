@@ -9,7 +9,7 @@ class SpeechToText:
         self.recogniser = sr.Recognizer()
 
     def __segment(self, path_to_file: str, target_parts:int = 4, silence_thresh: int = -40, min_silence_len: int = 600) -> list[str]:
-        audio = AudioSegment.from_file(audio_file)
+        audio = AudioSegment.from_file(path_to_file)
         chunks = split_on_silence(audio, min_silence_len=min_silence_len, silence_thresh=silence_thresh)
 
         total_duration_sec = len(audio) / 1000.0
