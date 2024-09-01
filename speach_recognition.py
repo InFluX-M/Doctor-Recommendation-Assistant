@@ -13,7 +13,7 @@ class SpeechToText:
         chunks = split_on_silence(audio, min_silence_len=min_silence_len, silence_thresh=silence_thresh)
 
         total_duration_sec = len(audio) / 1000.0
-        while total_duration_sec / target_parts < 15:
+        while total_duration_sec / target_parts < 15 and total_duration_sec > 15:
             target_parts -= 1
 
         segments = []
@@ -29,8 +29,9 @@ class SpeechToText:
         
         audio_files = []
         for i, segment in enumerate(segments):
-            segment.export(f"temp\segment_{i+1}.wav", format="wav")
-            audio_files.append(f"temp\segment_{i+1}.wav")
+            if segment:
+                segment.export(f"temp\segment_{i+1}.wav", format="wav")
+                audio_files.append(f"temp\segment_{i+1}.wav")
         
         return audio_files
 
