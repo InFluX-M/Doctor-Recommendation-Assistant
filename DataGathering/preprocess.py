@@ -104,13 +104,14 @@ class Doctor:
                 elif center['name'] == 'ویزیت آنلاین پذیرش24':
                     continue
                 else:
-                    for key in ['id', 'user_center_id', 'server_id', 'active_booking']:
+                    for key in ['id', 'user_center_id', 'server_id', 'active_booking', 'map']:
                         center.pop(key)
                     try:
                         center['center_type'] = center_type[center['center_type']]
                     except KeyError:
                         center['center_type'] = "متفرقه"
-
+                center['address'] = f"{center.pop('province_name')}، {center.pop('city_name')}، {center.pop('address')}"
+                result.append(center)
             return result
         
         self.dataframe['centers'] = self.dataframe['centers'].apply(prune)
@@ -147,7 +148,7 @@ class Doctor:
                 year += 1
             date = jdatetime.date(year, month, int(day))
         gregorian_datetime = date.togregorian()
-        return gregorian_datetime
+        return str(gregorian_datetime)
     
     def convert_first_available_appointment(self) -> None:
         self.dataframe['first_available_appointment'] = self.dataframe['first_available_appointment'].apply(self.convert_text_to_gregorian)
