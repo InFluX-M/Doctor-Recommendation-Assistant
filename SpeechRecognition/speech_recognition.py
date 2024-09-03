@@ -35,12 +35,16 @@ class SpeechToText:
         
         return audio_files
 
-    def recognize(self, path_to_file: str) -> tuple[str, str] | None:
+    def recognize(self, path_to_file: str, remove_file: bool = False) -> tuple[str, str] | str | None:
         with sr.AudioFile(path_to_file) as source:
             audio = self.recogniser.record(source)
         try:
             text = self.recogniser.recognize_google(audio, language="fa-IR")
-            return path_to_file, text
+            if not remove_file:
+                return path_to_file, text
+            else:
+                os.remove(path_to_file)
+                return text
         except sr.UnknownValueError:
             print("Google Web Speech could not understand the audio.")
         except sr.RequestError as e:
