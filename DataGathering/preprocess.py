@@ -118,35 +118,69 @@ class Doctor:
         return
     
     @classmethod
-    def convert_text_to_gregorian(cls, text: str) -> datetime:
+    def convert_text_to_gregorian(cls, text: str) -> str | None:
         if text == None:
             return None
-        months = {
-            'فروردین': 1,
-            'اردیبهشت': 2,
-            'خرداد': 3,
-            'تیر': 4,
-            'مرداد': 5,
-            'شهریور': 6,
-            'مهر': 7,
-            'آبان': 8,
-            'آذر': 9,
-            'دی': 10,
-            'بهمن': 11,
-            'اسفند': 12
+        persian_numbers = {
+            "یک": 1, "اول": 1, "دوم": 2, "دو": 2, "سوم": 3, "سه": 3, "چهار": 4, "چهارم": 4, "پنجم": 5, "پنج": 5, "ششم": 6, "شش": 6, "شیشم": 6, "شیش": 6, "هفتم": 7, "هفت": 7, "هشتم": 8, "هشت": 8, "نهم": 9, "نه": 9, "دهم": 10, "ده": 10, "یازدهم": 11, "یازده": 11, "دوازدهم": 12, "دوازده": 12, "سیزدهم": 13, "سیزده": 13, "چهاردهم": 14, "چهارده": 14, "پانزدهم": 15, "پانزده": 15, "پونزدهم": 15, "پونزده": 15, "شانزدهم": 16, "شانزده": 16, "شونزدهم": 16, "شونزده": 16, "هفدهم": 17, "هفده": 17, "هیفدهم": 17, "هیفده": 17, "هجدهم": 18, "هجده": 18, "هیجدهم": 18, "هیجده": 18, "نوزدهم": 19, "نوزده": 19, "بیستم": 20, "بیست": 20, "نیمه": 15, "اواسط": 15
         }
+        def convert_to_number(persian_text: str) -> int:
+            persian_text = persian_text.strip()
+            if persian_text in persian_numbers:
+                return persian_numbers[persian_text]
+            parts = persian_text.split(" و ")
+            number = 0
+            for part in parts:
+                if part in persian_numbers:
+                    number += persian_numbers[part]
+            return number if number > 0 else None
+        
         text = text.split(' ')
         if text[0] in ['امروز', 'کمتر']:
             date = jdatetime.date.today()
         elif text[0] == 'فردا':
             date = jdatetime.date.today() + jdatetime.timedelta(days=1)
+        elif 'پس فردا' in text:
+            date = jdatetime.date.today() + jdatetime.timedelta(days=2)
+        elif 'هفته' in text:
+            if 'بعد' in text:
+                date = jdatetime.date.today() + jdatetime.timedelta(days= 6 - jdatetime.date.today().weekday(), weeks=1)
+            else:
+                date = jdatetime.date.today() + jdatetime.timedelta(days= 6 - jdatetime.date.today().weekday())
+        elif 'ماه' in text:
+            month = jdatetime.date.today().month
+            year = jdatetime.date.today().year
+            if month < 11 and 'بعد' in text:
+                month += 2
+            elif month > 10 and 'بعد' in text:
+                month = (month + 2) % 12
+                year += 1
+            elif month < 12:
+                month += 1
+            else:
+                month = 1
+                year += 1
+            date = jdatetime.date(year=year, month=month, day=1) - jdatetime.timedelta(days= 1)
         else:
-            day = text[0]
-            month = months.get(text[1])
+            if text[0].isdigit():
+                day = int(day)
+                month = jdatetime.date.j_month_fa_to_num(text[1])
+            else:
+                index = -1
+                for m in jdatetime.date.j_months_fa:
+                    index = text.find(m)
+                    if index != -1:
+                        month = m
+                        break
+                if index != -1:
+                    day = convert_to_number(text[:index])
+                    month = jdatetime.date.j_month_fa_to_num(month)
+                else:
+                    return None
             year = jdatetime.date.today().year
             if jdatetime.date.today().month > month:
                 year += 1
-            date = jdatetime.date(year, month, int(day))
+            date = jdatetime.date(year, month, day)
         gregorian_datetime = date.togregorian()
         return str(gregorian_datetime)
     
