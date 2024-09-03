@@ -47,7 +47,7 @@ class SpeechToText:
             print(f"Could not request results from Google Web Speech service; {e}")
         return None
 
-    def parallel_recognize(self, path_to_file: str) -> str | None:
+    def parallel_recognize(self, path_to_file: str, remove_file: bool = False) -> str | None:
         if not os.path.exists("temp"):
             os.makedirs("temp")
 
@@ -65,6 +65,8 @@ class SpeechToText:
 
         for audio_file in audio_files:
             os.remove(audio_file)
+        if remove_file:
+            os.remove(path_to_file)
         return text
 
 
@@ -73,6 +75,6 @@ if __name__ == "__main__":
     t = time.time()
     audio_file = r"path\to\audio\file"
     stt = SpeechToText()
-    text = stt.parallel_recognize(audio_file)
+    text = stt.parallel_recognize(audio_file, remove_file=False)
     print(text)
     print("Time taken:", time.time() - t)
