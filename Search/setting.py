@@ -1,17 +1,24 @@
 # settings.py
 
-from elasticsearch import Elasticsearch
+from elasticsearch import AsyncElasticsearch, Elasticsearch
 
-def get_es_client(url="https://localhost:9200"):
+def get_es_client(url: str = "https://localhost:9200", get_async_client: bool = False) -> Elasticsearch | AsyncElasticsearch:
     """
     Create and return an Elasticsearch client.
-    docker cp elastic-es01-1:/usr/share/elasticsearch/config/certs .
+    docker cp search-es01-1:/usr/share/elasticsearch/config/certs .
     """
-    return Elasticsearch(
-        url,
-        ca_certs="./certs/ca/ca.crt",
-        basic_auth=("elastic", "456$%^rtyRTY")
-    )
+    if get_async_client:
+        return AsyncElasticsearch(
+            url,
+            ca_certs="Search/certs/ca/ca.crt",
+            basic_auth=("elastic", "456$%^rtyRTY")
+        )
+    else:
+        return Elasticsearch(
+            url,
+            ca_certs="Search/certs/ca/ca.crt",
+            basic_auth=("elastic", "456$%^rtyRTY")
+        )
 
 def get_number_of_replicas(es_client, index_name):
     """

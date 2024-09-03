@@ -9,3 +9,4 @@ transformers
 seqeval[gpu]
 mlflow
 jdatetime
+elasticsearch

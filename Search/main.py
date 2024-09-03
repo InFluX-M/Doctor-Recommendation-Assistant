@@ -7,6 +7,8 @@ es = get_es_client("https://localhost:9200")
 # Define the index name
 index_name = "mahmat"
 
+print(es.ping())
+
 print(count_shards(es, index_name))
 
 resp = es.indices.get_mapping(
