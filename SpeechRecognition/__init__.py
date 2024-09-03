@@ -1,2 +1,2 @@
 
-from .speach_recognition import SpeechToText
+from .speech_recognition import SpeechToText
