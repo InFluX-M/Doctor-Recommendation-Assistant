@@ -161,6 +161,7 @@ class Doctor:
         self.process_actions()
         self.process_centers()
         self.convert_first_available_appointment()
+        self.dataframe.drop(columns=['name', 'url'], inplace=True)
         return self.dataframe
     
 if __name__ == "__main__":
