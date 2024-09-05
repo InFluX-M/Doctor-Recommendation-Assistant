@@ -7,7 +7,7 @@ import requests
 import json
 
 TOKEN = "7398608021:AAHslR_-iBMF9rWyyYvJUZldv3yoHa9W33Y"
-URL = "http://127.0.0.1:8000/"
+URL = "http://fastapi:8000/"
 
 # Define states for the conversation
 SELECT_ACTION, REQUEST_TEXT, REQUEST_VOICE, SELECT_SPECIALTY, SELECT_CITY = range(5)
@@ -32,9 +32,9 @@ cities = [
 async def send_req(params, update: Update):
     user_id = update.message.from_user.id
     if "text" in params:
-        response = requests.post(f"{URL}requests/text", json={'text': params['text']})
+        response = requests.post(f"{URL}requests/text/{user_id}", json={'text': params['text']})
     elif "file" in params:
-        response = requests.post(f"{URL}requests/voice", files=params['file'])
+        response = requests.post(f"{URL}requests/voice/{user_id}", files=params['file'])
     elif "specialty" in params and "city" in params:
         response = requests.get(f"{URL}specialties/{params['specialty']}/{params['city']}")
     elif update.message.text == 'Show':
@@ -173,7 +173,7 @@ async def cancel(update: Update, context: CallbackContext) -> int:
     )
     return ConversationHandler.END
 
-app = ApplicationBuilder().token(TOKEN).read_timeout(30).write_timeout(30).build()
+app = ApplicationBuilder().token(TOKEN).build()
 
 conv_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
@@ -203,5 +203,3 @@ conv_handler = ConversationHandler(
 app.add_handler(conv_handler)
 
 app.run_polling()
-
-

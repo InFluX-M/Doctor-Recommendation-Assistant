@@ -6,12 +6,6 @@ import json
 from fastapi import FastAPI, UploadFile, File, Request
 import shutil
 import os
-import sys
-
-module_path = os.path.abspath(os.path.join('..'))
-if module_path not in sys.path:
-    sys.path.append(module_path)
-
 from SpeechRecognition.speech_recognition import SpeechToText
 
 # Configure logging
@@ -20,12 +14,11 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",  # Define the format of the logs
 )
 
+PATH = "SpeechRecognition/temp/"
+
 logger = logging.getLogger(__name__)
-
 app = FastAPI()
-
-# Connect to Redis
-r = redis.Redis(host='localhost', port=6380, db=0)
+r = redis.Redis(host='redis', port=6379, db=0)
 
 class History(BaseModel):
     request: str
@@ -57,38 +50,19 @@ async def get_requests(request: str):
     example = {"request": "example", "response": ["response3", "response4"]}
     return example
 
-@app.post("/requests/text")
-async def get_requests(request: Request):
-    # Extract the JSON data from the request
+@app.post("/requests/text/{user_id}")
+async def get_requests(user_id: str, request: Request):
     data = await request.json()
-    text = data.get('text')
+    return {"request": data.get('text'), "response": ["response3", "response4"]}
 
-    # Example response
-    example = {"request": text, "response": ["response3", "response4"]}
-    return example
+@app.post("/requests/voice/{user_id}")  
+async def get_requests(user_id: str, file: UploadFile = File(...)): 
+    path = f"{PATH}{user_id}/"
+    os.makedirs(path, exist_ok=True)
+    file_path = f"{path}{file.filename}"    
 
-
-@app.post("/requests/voice")
-async def get_requests(file: UploadFile = File(...)):
-    # Define the directory where you want to save the uploaded file
-    upload_directory = "uploaded_files/"
-    os.makedirs(upload_directory, exist_ok=True)  # Ensure the directory exists
-
-    # Define the file path
-    file_path = os.path.join(upload_directory, file.filename)
-
-    # Save the uploaded file to the specified path
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
-        
-    # Perform speech-to-text conversion
-    speech_recognition = SpeechToText()
-    text1 = speech_recognition.recognizer(file_path, True)
-    text2 = speech_recognition.parallel_recognize(file_path)
-    
-    logger.info(f"Converted speech to text: {text1}")
-    logger.info(f"Converted speech to text: {text2}")
-    
-    # Example response after saving the file
-    response_example = {"request": "example", "response": ["response1", "response2"], "file_path": file_path}
-    return response_example
+
+    text = SpeechToText().recognizer(file_path, True)
+    return {"request": text, "response": ["response1", "response2"]}

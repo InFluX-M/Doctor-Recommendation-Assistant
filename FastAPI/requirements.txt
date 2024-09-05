@@ -1,0 +1,12 @@
+
+uvicorn[standard]
+redis
+python-multipart
+fastapi
+pydantic
+uvicorn
+redis
+python-dotenv
+SpeechRecognition==3.10.4
+pydub==0.25.1
+ffmpeg
