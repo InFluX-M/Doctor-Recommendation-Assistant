@@ -32,7 +32,7 @@ cities = [
 async def send_req(params, update: Update):
     user_id = update.message.from_user.id
     if "text" in params:
-        response = requests.post(f"{URL}requests/text/{user_id}", json={'text': params['text']})
+        response = requests.post(f"{URL}requests/text/{user_id}", json={'request': params['text']})
     elif "file" in params:
         response = requests.post(f"{URL}requests/voice/{user_id}", files=params['file'])
     elif "specialty" in params and "city" in params:

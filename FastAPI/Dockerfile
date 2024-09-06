@@ -1,18 +1,27 @@
-# Use an official Python runtime as a parent image
-FROM docker.arvancloud.ir/python:3.12-alpine
+# Use Python slim image for CPU environment
+FROM docker.arvancloud.ir/python:3.10-slim
 
-# Install ffmpeg, flac, and other necessary dependencies
-RUN apk update && apk add --no-cache ffmpeg flac ffmpeg-libs && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev libffi-dev
+# Add this line to avoid expired repository metadata issues
+RUN apt-get -o Acquire::Check-Valid-Until=false update
+
+# Install system dependencies (ffmpeg and flac are included based on your original Dockerfile)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    flac \
+    && rm -rf /var/lib/apt/lists/*
 
 # Set the working directory in the container
 WORKDIR /app
 
+# Copy requirements.txt to /app
+COPY requirements.txt /app/requirements.txt
+
+# Install Python packages from requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
 # Copy the current directory contents into the container at /app
 COPY . /app
-
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose port 8000 to the outside world
 EXPOSE 8000
@@ -22,4 +31,3 @@ ENV PORT=8000
 
 # Run uvicorn server
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
-

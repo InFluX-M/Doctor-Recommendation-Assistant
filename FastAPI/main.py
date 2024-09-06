@@ -7,6 +7,7 @@ from fastapi import FastAPI, UploadFile, File, Request
 import shutil
 import os
 from SpeechRecognition.speech_recognition import SpeechToText
+from NLU.NLU import ONNXBertNERPredictor
 
 # Configure logging
 logging.basicConfig(
@@ -18,45 +19,62 @@ PATH = "SpeechRecognition/temp/"
 
 logger = logging.getLogger(__name__)
 app = FastAPI()
+logger.info("Application started")
 r = redis.Redis(host='redis', port=6379, db=0)
+logger.info("Connected to Redis")
+
+model_metadata_path = './NLU/model_metadata.json'
+onnx_model_path = './NLU/model.onnx'
+nlu = ONNXBertNERPredictor(model_metadata_path, onnx_model_path)
+logger.info("NLU model loaded")
 
 class History(BaseModel):
     request: str
     response: list[str]
+    
+class RequestModel(BaseModel):
+    request: str
+
 
 @app.post("/users/{user_id}")
 async def add_history(user_id: str, history: History):
+    logger.info(f"Adding history for user {user_id}")
     r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
+    logger.info(f"History added for user {user_id}")
     return {"user": user_id, "history": history}
 
 @app.put("/users/{user_id}")
 async def delete_history(user_id: str):
+    logger.info(f"Deleting history for user {user_id}")
     items = r.lrange(f'user:{user_id}:history', 0, -1)
     r.delete(f'user:{user_id}:history')
+    logger.info(f"History deleted for user {user_id}")
     return {"user": user_id, "deleted": ([json.loads(item) for item in items])}
     
 @app.get("/users/{user_id}")
 async def get_history(user_id: str):
+    logger.info(f"Getting history for user {user_id}")
     data = r.lrange(f'user:{user_id}:history', 0, -1)
+    logger.info(f"History retrieved for user {user_id}")
     return {"history": ([json.loads(item) for item in data])}
 
 @app.get("/specialties/{specialty}/{city}")
 async def get_specialty(specialty: str, city: str):
+    logger.info(f"Getting doctors for specialty {specialty} in city {city}")
     example = {"specialty": specialty, "city": city, "doctors": ["doctor1", "doctor2"]}
-    return example
-
-@app.post("/requests/text/{request}")
-async def get_requests(request: str):
-    example = {"request": "example", "response": ["response3", "response4"]}
+    logger.info(f"Got doctors for specialty {specialty} in city {city}")
     return example
 
 @app.post("/requests/text/{user_id}")
-async def get_requests(user_id: str, request: Request):
-    data = await request.json()
-    return {"request": data.get('text'), "response": ["response3", "response4"]}
+async def get_requests(user_id: str, body: RequestModel):
+    logger.info(f"Getting text request for user {user_id}")
+    res = nlu.predict(body.request)
+    logger.info(f"Got text request for user {user_id}")
+    return res
 
 @app.post("/requests/voice/{user_id}")  
 async def get_requests(user_id: str, file: UploadFile = File(...)): 
+    logger.info(f"Getting voice request for user {user_id}")
     path = f"{PATH}{user_id}/"
     os.makedirs(path, exist_ok=True)
     file_path = f"{path}{file.filename}"    
@@ -65,4 +83,6 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     text = SpeechToText().recognizer(file_path, True)
-    return {"request": text, "response": ["response1", "response2"]}
+    res = nlu.predict(text)
+    logger.info(f"Got voice request for user {user_id}")
+    return res
