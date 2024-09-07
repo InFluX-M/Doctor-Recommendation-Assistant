@@ -8,6 +8,7 @@ import shutil
 import os
 from SpeechRecognition.speech_recognition import SpeechToText
 from NLU.NLU import ONNXBertNERPredictor
+from typing import List, Tuple
 
 # Configure logging
 logging.basicConfig(
@@ -30,7 +31,8 @@ logger.info("NLU model loaded")
 
 class History(BaseModel):
     request: str
-    response: list[str]
+    response: List[Tuple[str, str]]
+    response_time: float
     
 class RequestModel(BaseModel):
     request: str
@@ -69,6 +71,12 @@ async def get_specialty(specialty: str, city: str):
 async def get_requests(user_id: str, body: RequestModel):
     logger.info(f"Getting text request for user {user_id}")
     res = nlu.predict(body.request)
+    history = History (
+        request=res['request'],
+        response=res["response"], 
+        response_time=res['prediction_time_in_seconds']
+    )
+    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
     logger.info(f"Got text request for user {user_id}")
     return res
 
@@ -84,5 +92,11 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
 
     text = SpeechToText().recognizer(file_path, True)
     res = nlu.predict(text)
+    history = History (
+        request=res['request'],
+        response=res["response"], 
+        response_time=res['prediction_time_in_seconds']
+    )
+    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
     logger.info(f"Got voice request for user {user_id}")
     return res
