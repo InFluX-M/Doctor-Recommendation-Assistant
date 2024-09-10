@@ -78,10 +78,13 @@ if __name__ == "__main__":
     predictor = ONNXBertNERPredictor(model_metadata_path, onnx_model_path)
 
     # Example input sentence (in Persian)
-    sentence = "آیا میتونی برای من یک فلوشیپ مغز و اعصاب مهربون و آقا در خیابان شمس آبادی اصفهان پیدا کنی که بااخلاق و با سواد باشه و قیمت مناسبی هم بگیره برای بیماری میگرن پسرم میخوام. اولین نوبت آزاد هم لطفا ۲۵ خرداد باشه بصورت غیرحضوری"
+    sentence = "هی ربات من پسرم سرماخورده و براش دنبال فوق تخصص داخلی میگردم. برا پسرم یکی و توی زینبیه علی آباد پیدا کن غیر حضوری"
+    sentence = "ربات میشه واسه شوهرم یک دکتر عمومی توی خرم آباد محله تجریش پیدا کنی میخوام خیلی زود و به صورت غیر حضوری برم و دکتر مهربون و خوش اخلاق باشه برای یکشنبه"
+    sentence = "سلام برای بیماری قند خون پدرم نیاز به یک فوق تخصص داخلی دارم برای شنبه غیر حضوری در فدک اصفهان ."
 
     # Predict using the ONNX model
     final_output = predictor.predict(sentence)
 
     # Print the result in the desired format
     print(final_output)
+
