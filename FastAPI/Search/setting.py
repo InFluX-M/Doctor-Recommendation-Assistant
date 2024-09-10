@@ -2,7 +2,7 @@
 
 from elasticsearch import AsyncElasticsearch, Elasticsearch
 
-def get_es_client(url: str = "https://localhost:9200", get_async_client: bool = False) -> Elasticsearch | AsyncElasticsearch:
+def get_es_client(url: str = "https://es01:9200", get_async_client: bool = False) -> Elasticsearch | AsyncElasticsearch:
     """
     Create and return an Elasticsearch client.
     docker cp search-es01-1:/usr/share/elasticsearch/config/certs .
