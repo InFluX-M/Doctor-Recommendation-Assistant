@@ -215,7 +215,7 @@ class AsyncSearch:
             })
 
         if 'apt' in keyword:
-            date = Doctor.convert_text_to_gregorian(keyword['apt'])
+            date = convert_text_to_gregorian(keyword['apt'])
             query["query"]["bool"]['must'].append({
                 "range": {"first_available_appointment": {"lte": date}}
             })
