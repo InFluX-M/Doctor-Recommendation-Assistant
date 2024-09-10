@@ -121,7 +121,8 @@ class Search:
                 {"waiting_time": {"order": "asc"}},
                 {"rates_count": {"order": "desc"}}, 
                 {"number_of_visits": {"order": "desc"}}, 
-            ]
+            ],
+            'size': 5
         }
 
         if 'loc' in keyword:
@@ -217,7 +218,7 @@ class AsyncSearch:
         if await self.elastic.indices.exists(index="doctors"):
             await self.elastic.indices.delete(index="doctors")
 
-    async def query(self, keyword: dict) -> dict:
+    async def query(self, keyword: dict) -> list[dict]:
         query = {
             'query': {
                 "bool": {
@@ -231,7 +232,8 @@ class AsyncSearch:
                 {"waiting_time": {"order": "asc"}},
                 {"rates_count": {"order": "desc"}}, 
                 {"number_of_visits": {"order": "desc"}}, 
-            ]
+            ],
+            'size': 5
         }
 
         if 'loc' in keyword:
@@ -308,15 +310,15 @@ class AsyncSearch:
                 })
 
         response = await self.elastic.search(index="doctors", body=query)
-        return response
+        return [hit['_source'] for hit in response['hits']['hits']]
     
 
 if __name__ == "__main__":
-    async def main(keyword: dict) -> dict:
+    async def main(keyword: dict):
         s = AsyncSearch()
         await s.initialize()
         result = await s.query(keyword=keyword)
-        print(result['hits'])
+        print(result)
     asyncio.run(main(keyword={'loc': ["مشهد"], 'gnd': 'خانوم', 'spy': 'مغز و اعصاب'}))
     # s = Search()
     # result = s.query()
