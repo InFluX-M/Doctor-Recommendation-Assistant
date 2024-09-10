@@ -3,7 +3,7 @@ import json
 import asyncio
 from typing import List, Dict
 import jdatetime
-from Search.setting import get_es_client
+from .setting import get_es_client
 
 def convert_text_to_gregorian(text: str) -> str | None:
     if text == None:
@@ -183,6 +183,7 @@ class AsyncSearch:
                 }
             },
             'sort': [
+                {"_score": {"order": "desc"}}, 
                 {"calculated_rate": {"order": "desc"}}, 
                 {"waiting_time": {"order": "asc"}},
                 {"rates_count": {"order": "desc"}}, 
@@ -192,7 +193,7 @@ class AsyncSearch:
         }
 
         if 'loc' in keyword:
-            with open('Search/cities.csv', 'r', encoding='utf-8') as f:
+            with open('data/cities.csv', 'r', encoding='utf-8') as f:
                 cities = [city.replace('\n', '') for city in f.readlines()]
             city = None
             address = None
@@ -224,8 +225,8 @@ class AsyncSearch:
             query["query"]["bool"]['should'].append({
                 "multi_match": {
                     "query": keyword['cnd'],
-                    "type": "cross_fields",
-                    "fields": ["display_expertise", "expertise"]
+                    "type": "cross_fileds",
+                    "fields": ['display_expertise', 'expertise']
                 }
             })
 
@@ -240,7 +241,7 @@ class AsyncSearch:
             })
 
         if 'srt' in keyword:
-            query["query"]["bool"]['must'].append({
+            query["query"]["bool"]['should'].append({
                 "match": {"display_expertise": keyword['srt']}
             })
 
@@ -248,8 +249,8 @@ class AsyncSearch:
             query["query"]["bool"]['must'].append({
                 "multi_match": {
                     "query": keyword['spy'],
-                    "type": "cross_fields",
-                    "fields": ["display_expertise", "expertise"]
+                    "type": "cross_fileds",
+                    "fields": ['display_expertise', 'expertise']
                 }
             })
 
