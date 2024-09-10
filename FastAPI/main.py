@@ -9,6 +9,7 @@ import os
 from SpeechRecognition.speech_recognition import SpeechToText
 from NLU.NLU import ONNXBertNERPredictor
 from typing import List, Tuple
+from Search.search import AsyncSearch
 
 # Configure logging
 logging.basicConfig(
@@ -91,12 +92,34 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     text = SpeechToText().recognizer(file_path, True)
-    res = nlu.predict(text)
+    pred = nlu.predict(text)
     history = History (
-        request=res['request'],
-        response=res["response"], 
-        response_time=res['prediction_time_in_seconds']
+        request=pred['request'],
+        response=pred["response"], 
+        response_time=pred['prediction_time_in_seconds']
     )
     r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
     logger.info(f"Got voice request for user {user_id}")
+
+    search = AsyncSearch()
+    await search.initialize()
+
+    keyword = {}
+    for word in pred.keys():
+        tag = pred[word]
+        if tag == 'O':
+            continue
+        elif 'loc' in tag:
+            try:
+                keyword['loc'].append(word)
+            except KeyError:
+                keyword['loc'] = [word]
+        else:
+            key = tag.split('-')[1]
+            try:
+                ' '.join([keyword[key], word])
+            except KeyError:
+                keyword[key] = word
+
+    res = await search.query(keyword) 
     return res
