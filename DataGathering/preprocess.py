@@ -65,6 +65,17 @@ class Doctor:
             self.dataframe[col] = self.dataframe[col].apply(lambda x: ast.literal_eval(x))
         return
         
+    def process_waiting_time(self) -> None:
+        self.dataframe['waiting_time'] = self.dataframe['waiting_time'].replace({
+            'کمتر از نیم ساعت': 0,
+            'کمتر از یک ساعت': 1,
+            'بیشتر از یک ساعت': 2,
+            'کمتر از دو ساعت': 3,
+            'بیشتر از دو ساعت': 4
+        })
+        self.dataframe['waiting_time'] = self.dataframe['waiting_time'].fillna(5)
+        return
+
     def process_badges(self) -> None:
         self.dataframe['badges'] = self.dataframe['badges'].apply(
             lambda x: [badge['title'] for badge in x if "فعال" not in badge['title']]
@@ -110,7 +121,7 @@ class Doctor:
                         center['center_type'] = center_type[center['center_type']]
                     except KeyError:
                         center['center_type'] = "متفرقه"
-                center['address'] = f"{center.pop('province_name')}، {center.pop('city_name')}، {center.pop('address')}"
+                # center['address'] = f"{center.pop('province_name')}، {center.pop('city_name')}، {center.pop('address')}"
                 result.append(center)
             return result
         
@@ -163,7 +174,7 @@ class Doctor:
             date = jdatetime.date(year=year, month=month, day=1) - jdatetime.timedelta(days= 1)
         else:
             if text[0].isdigit():
-                day = int(day)
+                day = int(text[0])
                 month = jdatetime.date.j_month_fa_to_num(text[1])
             else:
                 index = -1
@@ -189,16 +200,19 @@ class Doctor:
         return
     
     def process(self, sql_script_path: str) -> pd.DataFrame:
+        self.dataframe.drop_duplicates(subset='url', keep='first', inplace=True, ignore_index=True)
         self.correct_gender(sql_script_path)
         self.convert_str_to_list()
+        self.process_waiting_time()
         self.process_badges()
         self.process_actions()
         self.process_centers()
         self.convert_first_available_appointment()
-        self.dataframe.drop(columns=['name', 'url'], inplace=True)
+        self.dataframe.drop(columns=['id', 'name', 'display_address', 'image'], inplace=True)
         return self.dataframe
     
 if __name__ == "__main__":
     doctor = Doctor(pd.read_csv("data/doctors.csv"))
     df = doctor.process("data/names.sql")
-    df.to_json("data/doctors.json", orient='records', force_ascii=False)
+    df.reset_index().to_json("data/doctors.json", orient='records', force_ascii=False)
+    df.to_csv("data/processed_doctors.csv", index=False)

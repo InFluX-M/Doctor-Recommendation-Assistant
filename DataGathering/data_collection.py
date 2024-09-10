@@ -47,14 +47,18 @@ class Paziresh24:
 
     def get_last_collected_strata(self) -> set:
         collected_strata = set()
+        collected = 0
         try:
             with open('temp/data_collection.log', 'r') as log_file:
                 lines = log_file.readlines()
                 for line in lines:
                     if "collected" in line:
                         collected_strata.add(line.strip().split('collected ')[1])
+                        collected = 1
         except FileNotFoundError:
             pass
+        if collected:
+            self.data = pd.read_csv('data/doctors.csv', index_col='Unnamed: 0')
         return collected_strata
 
 
@@ -116,7 +120,7 @@ class Paziresh24:
                         df = self.get_strata(strata + f"/?result_type=فقط+پزشکان{gender}")
                         self.data = pd.concat([self.data, df], axis=0, ignore_index=True)
 
-                self.data.drop_duplicates(subset='id', inplace=True)
+                # self.data.drop_duplicates(subset='id', inplace=True)
                 self.data.to_csv('data/doctors.csv')
                 logging.info(f"collected {strata}")
         
