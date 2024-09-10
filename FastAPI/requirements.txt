@@ -11,3 +11,4 @@ transformers==4.29.2  # Compatible version of Hugging Face Transformers
 onnxruntime==1.14.1  # ONNX Runtime for inference
 numpy==1.24.3        # NumPy for tensor manipulation
 typing
+elasticsearch
