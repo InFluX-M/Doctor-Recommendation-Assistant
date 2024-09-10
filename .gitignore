@@ -3,5 +3,5 @@ mlflow
 mlruns
 temp
 *.csv#
-Search/__pycache__
-Search/certs
+FastAPI/Search/__pycache__
+FastAPI/Search/certs
