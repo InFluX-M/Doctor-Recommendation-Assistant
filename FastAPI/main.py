@@ -129,7 +129,7 @@ async def get_requests(user_id: str, file: UploadFile = File(...), search: Async
         else:
             key = tag.split('-')[1]
             try:
-                ' '.join([keyword[key], word])
+                keyword[key] = ' '.join([keyword[key], word])
             except KeyError:
                 keyword[key] = word
 
