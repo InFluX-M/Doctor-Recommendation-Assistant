@@ -4,7 +4,6 @@ import os
 import ast
 import re
 import jdatetime
-from datetime import datetime
 
 class Doctor:
     def __init__(self, dataframe:pd.DataFrame) -> None:
@@ -200,19 +199,19 @@ class Doctor:
         return
     
     def process(self, sql_script_path: str) -> pd.DataFrame:
-        self.dataframe.drop_duplicates(subset='url', keep='first', inplace=True, ignore_index=True)
-        self.correct_gender(sql_script_path)
+        #self.dataframe.drop_duplicates(subset='url', keep='first', inplace=True, ignore_index=True)
+        #self.correct_gender(sql_script_path)
         self.convert_str_to_list()
-        self.process_waiting_time()
-        self.process_badges()
-        self.process_actions()
-        self.process_centers()
-        self.convert_first_available_appointment()
-        self.dataframe.drop(columns=['id', 'name', 'display_address', 'image'], inplace=True)
+        #self.process_waiting_time()
+        #self.process_badges()
+        #self.process_actions()
+        #self.process_centers()
+        #self.convert_first_available_appointment()
+        #self.dataframe.drop(columns=['id', 'name', 'display_address', 'image'], inplace=True)
         return self.dataframe
     
 if __name__ == "__main__":
-    doctor = Doctor(pd.read_csv("data/doctors.csv"))
+    doctor = Doctor(pd.read_csv("/home/influx/Desktop/hammasir-project/data/processed_doctors.csv"))
     df = doctor.process("data/names.sql")
     df.reset_index().to_json("data/doctors.json", orient='records', force_ascii=False)
-    df.to_csv("data/processed_doctors.csv", index=False)
+    #df.to_csv("data/processed_doctors.csv", index=False)

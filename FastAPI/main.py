@@ -103,10 +103,12 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
 
     search = AsyncSearch()
     await search.initialize()
+    
+    logger.info(f"Pred {pred}")
 
     keyword = {}
-    for word in pred.keys():
-        tag = pred[word]
+    tmp = pred['response']
+    for word, tag in tmp:
         if tag == 'O':
             continue
         elif 'loc' in tag:
@@ -122,4 +124,6 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
                 keyword[key] = word
 
     res = await search.query(keyword) 
-    return res
+    logger.info(f"Res {res}")
+    urls = [(doctor['display_name'], 'https://www.paziresh24.com' + doctor['url']) for doctor in res]
+    return urls
