@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel
 import logging
 import redis
@@ -10,6 +10,7 @@ from SpeechRecognition.speech_recognition import SpeechToText
 from NLU.NLU import ONNXBertNERPredictor
 from typing import List, Tuple
 from Search.search import AsyncSearch
+from contextlib import asynccontextmanager
 
 # Configure logging
 logging.basicConfig(
@@ -20,7 +21,6 @@ logging.basicConfig(
 PATH = "SpeechRecognition/temp/"
 
 logger = logging.getLogger(__name__)
-app = FastAPI()
 logger.info("Application started")
 r = redis.Redis(host='redis', port=6379, db=0)
 logger.info("Connected to Redis")
@@ -37,6 +37,19 @@ class History(BaseModel):
 class RequestModel(BaseModel):
     request: str
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    search = AsyncSearch()
+    await search.initialize()
+    app.state.search = search
+    yield
+    await search.close()
+
+app = FastAPI(lifespan=lifespan)
+
+async def get_es_client() -> AsyncSearch:
+    return app.state.search
 
 @app.post("/users/{user_id}")
 async def add_history(user_id: str, history: History):
@@ -111,7 +124,7 @@ async def get_requests(user_id: str, body: RequestModel):
     return urls
 
 @app.post("/requests/voice/{user_id}")  
-async def get_requests(user_id: str, file: UploadFile = File(...)): 
+async def get_requests(user_id: str, file: UploadFile = File(...), search: AsyncSearch = Depends(get_es_client)): 
     logger.info(f"Getting voice request for user {user_id}")
     path = f"{PATH}{user_id}/"
     os.makedirs(path, exist_ok=True)
@@ -123,9 +136,6 @@ async def get_requests(user_id: str, file: UploadFile = File(...)):
     text = SpeechToText().recognizer(file_path, True)
     pred = nlu.predict(text)
     logger.info(f"Got voice request for user {user_id}")
-
-    search = AsyncSearch()
-    await search.initialize()
     
     logger.info(f"Pred {pred}")
 

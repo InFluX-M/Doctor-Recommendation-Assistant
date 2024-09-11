@@ -4,6 +4,7 @@ from typing import List, Dict
 import jdatetime
 from Search.setting import get_es_client
 import asyncio
+
 def convert_text_to_gregorian(text: str) -> str | None:
     if text == None:
         return None
@@ -182,17 +183,17 @@ class AsyncSearch:
                 }
             },
             'sort': [
-                {"_score": {"order": "desc"}},
-                {"calculated_rate": {"order": "desc"}},
+                {"_score": {"order": "desc"}}, 
+                {"calculated_rate": {"order": "desc"}}, 
                 {"waiting_time": {"order": "asc"}},
-                {"rates_count": {"order": "desc"}},
-                {"number_of_visits": {"order": "desc"}},
+                {"rates_count": {"order": "desc"}}, 
+                {"number_of_visits": {"order": "desc"}}, 
             ],
             'size': 5
         }
 
         if 'loc' in keyword:
-            with open('Search/cities.csv', 'r', encoding='utf-8') as f:
+            with open('data/cities.csv', 'r', encoding='utf-8') as f:
                 cities = [city.replace('\n', '') for city in f.readlines()]
             city = None
             address = None
