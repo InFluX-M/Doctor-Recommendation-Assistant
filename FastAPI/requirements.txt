@@ -13,3 +13,4 @@ numpy==1.24.3        # NumPy for tensor manipulation
 typing
 elasticsearch
 jdatetime
+aiohttp
