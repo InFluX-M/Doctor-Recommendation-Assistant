@@ -1,9 +1,9 @@
 from elasticsearch import helpers
 import json
-import asyncio
 from typing import List, Dict
 import jdatetime
-from .setting import get_es_client
+from Search.setting import get_es_client
+import asyncio
 
 def convert_text_to_gregorian(text: str) -> str | None:
     if text == None:
@@ -81,7 +81,7 @@ class AsyncSearch:
         if not await self.elastic.ping():
             raise Exception("Could not connect to Elasticsearch.")
         if not await self.elastic.indices.exists(index="doctors"):
-            self._init_es()
+            await self._init_es()
         
     async def _init_es(self, path_to_json: str = "Search/doctors.json") -> None:
         mapping = {
@@ -165,7 +165,7 @@ class AsyncSearch:
             {"_index": "doctors", "_op_type": "index", "_id": doctor.pop('index'), "_source": doctor}
             for doctor in data
         ]
-        success, failed = await helpers.bulk(self.elastic, doctors)
+        success, failed = await helpers.async_bulk(self.elastic, doctors)
         print(f"Successfully indexed {success} documents, {failed} failed")
         return
 
@@ -208,16 +208,16 @@ class AsyncSearch:
                 loc.append({'term': {"centers.city_name": {'value': city}}})
             if address:
                 loc.append({'match': {'centers.address': address}})
-            query["query"]["bool"]['must'].append({
+            query["query"]["bool"]['should'].append({
                 "nested": {
                     "path": "centers",
-                    "query": {'bool': {'must': loc}}
+                    "query": {'bool': {'should': loc}}
                 }
             })
 
         if 'apt' in keyword:
             date = convert_text_to_gregorian(keyword['apt'])
-            query["query"]["bool"]['must'].append({
+            query["query"]["bool"]['should'].append({
                 "range": {"first_available_appointment": {"lte": date}}
             })
 
@@ -225,7 +225,7 @@ class AsyncSearch:
             query["query"]["bool"]['should'].append({
                 "multi_match": {
                     "query": keyword['cnd'],
-                    "type": "cross_fileds",
+                    "type": "cross_fields",
                     "fields": ['display_expertise', 'expertise']
                 }
             })
@@ -246,27 +246,29 @@ class AsyncSearch:
             })
 
         if 'spy' in keyword:
-            query["query"]["bool"]['must'].append({
+            query["query"]["bool"]['should'].append({
                 "multi_match": {
                     "query": keyword['spy'],
-                    "type": "cross_fileds",
+                    "type": "cross_fields",
                     "fields": ['display_expertise', 'expertise']
                 }
             })
 
         if 'trt' in keyword:
-            query["query"]["bool"]['must'].append({
+            query["query"]["bool"]['should'].append({
                 "terms": {"badges": ['خوش برخورد']}
             })
 
         if 'vtp' in keyword:
             if keyword['vtp'] in ["آنلاین", "غیرحضوری", "غیر حضوری", "مجازی", "اینترنتی", "برخط", "بر خط"]:
-                query["query"]["bool"]['must'].append({
+                query["query"]["bool"]['should'].append({
                     "term": {"online_visit": True}
                 })
 
         response = await self.elastic.search(index="doctors", body=query)
         return [hit['_source'] for hit in response['hits']['hits']]
-    
+        
     async def close(self) -> None:
         await self.elastic.close()
+        
+        

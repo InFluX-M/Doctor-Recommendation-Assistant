@@ -5,6 +5,7 @@ from telegram.ext import (
 )
 import requests
 import json
+import aiohttp
 
 TOKEN = "7398608021:AAHslR_-iBMF9rWyyYvJUZldv3yoHa9W33Y"
 URL = "http://fastapi:8000/"

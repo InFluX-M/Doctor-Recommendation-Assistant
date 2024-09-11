@@ -32,8 +32,7 @@ logger.info("NLU model loaded")
 
 class History(BaseModel):
     request: str
-    response: List[Tuple[str, str]]
-    response_time: float
+    response: list[Tuple[str, str]]
     
 class RequestModel(BaseModel):
     request: str
@@ -84,15 +83,45 @@ async def get_specialty(specialty: str, city: str):
 @app.post("/requests/text/{user_id}")
 async def get_requests(user_id: str, body: RequestModel):
     logger.info(f"Getting text request for user {user_id}")
-    res = nlu.predict(body.request)
-    history = History (
-        request=res['request'],
-        response=res["response"], 
-        response_time=res['prediction_time_in_seconds']
-    )
-    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
+    pred = nlu.predict(body.request)
     logger.info(f"Got text request for user {user_id}")
-    return res
+    
+    search = AsyncSearch()
+    await search.initialize()
+    
+    logger.info(f"Pred {pred}")
+
+    keyword = {}
+    tmp = pred['response']
+    for word, tag in tmp:
+        if tag == 'O':
+            continue
+        elif 'loc' in tag:
+            try:
+                keyword['loc'].append(word)
+            except KeyError:
+                keyword['loc'] = [word]
+        else:
+            key = tag.split('-')[1]
+            try:
+                keyword[key] = ' '.join([keyword[key], word])
+            except KeyError:
+                keyword[key] = word
+
+    logger.info(f"Keywords {keyword}")
+
+    res = await search.query(keyword) 
+    logger.info(f"Res {res}")
+    urls = [(doctor['display_name'], 'https://www.paziresh24.com' + doctor['url']) for doctor in res]
+    
+    history = History (
+        request=pred['request'],
+        response=urls, 
+    )
+
+    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
+
+    return urls
 
 @app.post("/requests/voice/{user_id}")  
 async def get_requests(user_id: str, file: UploadFile = File(...), search: AsyncSearch = Depends(get_es_client)): 
@@ -106,12 +135,6 @@ async def get_requests(user_id: str, file: UploadFile = File(...), search: Async
 
     text = SpeechToText().recognizer(file_path, True)
     pred = nlu.predict(text)
-    history = History (
-        request=pred['request'],
-        response=pred["response"], 
-        response_time=pred['prediction_time_in_seconds']
-    )
-    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
     logger.info(f"Got voice request for user {user_id}")
     
     logger.info(f"Pred {pred}")
@@ -133,7 +156,16 @@ async def get_requests(user_id: str, file: UploadFile = File(...), search: Async
             except KeyError:
                 keyword[key] = word
 
+    logger.info(f"Keywords {keyword}")
+
     res = await search.query(keyword) 
     logger.info(f"Res {res}")
     urls = [(doctor['display_name'], 'https://www.paziresh24.com' + doctor['url']) for doctor in res]
+    
+    history = History (
+        request=pred['request'],
+        response=urls, 
+    )
+    r.rpush(f'user:{user_id}:history', json.dumps(history.model_dump()))
+    
     return urls
