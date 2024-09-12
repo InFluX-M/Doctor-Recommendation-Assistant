@@ -1,5 +1,0 @@
-outs:
-- md5: df36c353eb302a0770417c83b9916e66
-  size: 607
-  hash: md5
-  path: model_metadata.json
