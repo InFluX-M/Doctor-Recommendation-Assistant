@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-block: 1rem;
+
+  .logo {
+    display: flex;
+    align-items: center;
+
+    img {
+      width: 50px;
+    }
+
+    h1 {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+  }
+
+  .nav {
+    display: flex;
+    gap: 3rem;
+
+    a {
+      font-size: 1rem;
+    }
+
+    .active {
+      font-weight: bold;
+    }
+  }
+}

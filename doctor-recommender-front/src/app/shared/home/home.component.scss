@@ -1,0 +1,44 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin-inline: 10rem;
+
+  .hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-block: 2rem;
+
+    .text {
+      width: 40%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2rem;
+
+      h1 {
+        font-size: 3rem;
+        font-weight: bold;
+      }
+
+      p {
+        font-size: 1.2rem;
+      }
+
+      button {
+        padding-inline: 1.5rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        width: 12rem;
+        height: 3.5rem;
+        border-radius: 2rem;
+
+        &:hover {
+          //background-color: #ff5983;
+        }
+      }
+    }
+  }
+}
