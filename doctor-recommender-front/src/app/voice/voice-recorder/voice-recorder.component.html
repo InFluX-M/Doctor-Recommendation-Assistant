@@ -1,1 +1,24 @@
-<p>voice-recorder works!</p>
+<h1>Press Record to start recording 🎙️</h1>
+
+<button #recButton (click)="toggleRecording()">Record</button>
+<button #pauseButton style="display: none" (click)="togglePause()">
+  Pause
+</button>
+
+<select #micSelect>
+  <option value="" hidden>Select mic</option>
+</select>
+
+<label>
+  <input type="checkbox" (click)="onScrollingWaveformChange($event)" />
+  Scrolling waveform
+</label>
+
+<p #progress>00:00</p>
+
+<div
+  #mic
+  style="border: 1px solid #ddd; border-radius: 4px; margin-top: 1rem"
+></div>
+
+<div #recordings style="margin: 1rem 0"></div>
