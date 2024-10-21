@@ -1,10 +1,24 @@
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { VoiceRecorderComponent } from './voice-recorder/voice-recorder.component';
-import { SharedModule } from '../shared/shared.module';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { NzFlexModule } from 'ng-zorro-antd/flex';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [VoiceRecorderComponent],
-  imports: [CommonModule, SharedModule],
+  exports: [VoiceRecorderComponent],
+  imports: [
+    CommonModule,
+    NzFlexModule,
+    RouterLink,
+    RouterLinkActive,
+    NgOptimizedImage,
+    NzButtonModule,
+    NzSelectModule,
+    FormsModule,
+  ],
 })
 export class VoiceModule {}
