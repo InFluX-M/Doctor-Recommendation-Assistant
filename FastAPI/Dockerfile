@@ -1,5 +1,5 @@
 # Use Python slim image for CPU environment
-FROM docker.arvancloud.ir/python:3.10-slim
+FROM python:3.10
 
 # Add this line to avoid expired repository metadata issues
 RUN apt-get -o Acquire::Check-Valid-Until=false update

@@ -1,7 +1,8 @@
-version: "2.2"
+version: "3.8"
 
 services:
   telegrambot:
+    platform: linux/amd64
     build:
       context: ./telegram
       dockerfile: Dockerfile
@@ -16,6 +17,7 @@ services:
       retries: 5
     
   fastapi:
+    platform: linux/amd64
     build:
       context: ./FastAPI
       dockerfile: Dockerfile
@@ -34,6 +36,7 @@ services:
       # Add any other necessary environment variables here
 
   redis:
+    platform: linux/amd64
     image: redis:latest
     volumes:
       - redisdata:/data
