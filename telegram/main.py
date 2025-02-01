@@ -7,7 +7,7 @@ import requests
 import json
 import aiohttp
 
-TOKEN = "7398608021:AAHslR_-iBMF9rWyyYvJUZldv3yoHa9W33Y"
+TOKEN = ""
 URL = "http://fastapi:8000/"
 
 # Define states for the conversation
