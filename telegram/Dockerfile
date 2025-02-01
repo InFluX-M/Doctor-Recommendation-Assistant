@@ -17,7 +17,7 @@ COPY . /app
 EXPOSE 8001
 
 # Define environment variable
-ENV TOKEN=7398608021:AAHslR_-iBMF9rWyyYvJUZldv3yoHa9W33Y
+ENV TOKEN=
 
 # Run bot.py when the container launches
 CMD ["python", "main.py"]
